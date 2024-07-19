@@ -1,5 +1,7 @@
 package src;
 import java.util.ArrayList;
+import java.util.Random;
+
 import com.google.gson.GsonBuilder;
 
 /**
@@ -9,7 +11,53 @@ import com.google.gson.GsonBuilder;
  */
 public class EduChain {
     public static ArrayList<Block> blockchain = new ArrayList<Block>();
-    public static int difficulty = 4;
+    public static enum Mode {INCREMENT, RANDOM};
+
+    // Options
+    public static int difficulty = 4; // ** SET DIFFICULTY LEVEL **
+    public static int numBlocks = 10; // ** SET NUMBER OF BLOCKS **
+    public static Mode miningMode = Mode.INCREMENT; // ** SET MINING MODE **
+
+    public static void main(String[] args) {
+        int totalAttempts = 0;
+        long totalTime = 0;
+        System.out.println("\n\tDifficulty Level: " + difficulty);
+
+        // The first block is called the genesis block.
+        // Because there is no previous block we enter “0” as the previous hash.
+        for (int i = 0; i < numBlocks; i++) {
+            String prevHash;
+            if (i == 0) {
+                prevHash = "0";
+            } else {
+                prevHash = blockchain.get(blockchain.size()-1).hash;
+            }
+
+            // Create block
+            blockchain.add(new Block(genRandomString(), prevHash));
+
+            // Mine block
+            System.out.println("Trying to Mine block " + i + "... ");
+            Block block = blockchain.get(i);
+            if (miningMode == Mode.INCREMENT) {
+                block.mineBlockIncrement(difficulty);
+
+            } else if (miningMode == Mode.RANDOM) {
+                block.mineBlockRandom(difficulty);
+            }
+
+            totalAttempts += block.attempts;
+            totalTime += block.miningTime;
+        }
+
+		System.out.println("\nBlockchain is Valid: " + isValidChain());
+		
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
+		System.out.println("\nThe block chain: ");
+		System.out.println(blockchainJson);
+        System.out.println("\n\n\tTotal Attempts: " + totalAttempts);
+        System.out.println("\tTotal Mining Time: " + totalTime + " ms");
+    }
 
     /**
      * Validates the blockchain by checking the hashes and proof of work for each block.
@@ -53,27 +101,19 @@ public class EduChain {
         return true;
     }
 
-    public static void main(String[] args) {
-        System.out.println("\n\tDifficulty Level: " + difficulty);
+    // Generate a random 10 character string for the block data
+    public static String genRandomString() {
+        int length = 10;
+        int ASCII_START = 33; // !
+        int ASCII_END = 126; // ~
+        StringBuilder sb = new StringBuilder();
+        Random r = new Random();
 
-        // The first block is called the genesis block.
-        // Because there is no previous block we enter “0” as the previous hash.
-        blockchain.add(new Block("Hi im the first block!", "0"));
-        System.out.println("Trying to Mine block 1... ");
-		blockchain.get(0).mineBlock(difficulty);
-		
-		blockchain.add(new Block("Yo im the second block",blockchain.get(blockchain.size()-1).hash));
-		System.out.println("Trying to Mine block 2... ");
-		blockchain.get(1).mineBlock(difficulty);
-		
-		blockchain.add(new Block("Hey im the third block",blockchain.get(blockchain.size()-1).hash));
-		System.out.println("Trying to Mine block 3... ");
-		blockchain.get(2).mineBlock(difficulty);	
-		
-		System.out.println("\nBlockchain is Valid: " + isValidChain());
-		
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);
-		System.out.println("\nThe block chain: ");
-		System.out.println(blockchainJson);
+        for (int i = 0; i < length; i++) {
+            int ascii = ASCII_START + r.nextInt(ASCII_END - ASCII_START + 1);
+            sb.append((char) ascii);
+        }
+
+        return sb.toString();
     }
 }
