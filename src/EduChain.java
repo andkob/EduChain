@@ -11,12 +11,12 @@ import com.google.gson.GsonBuilder;
  */
 public class EduChain {
     public static ArrayList<Block> blockchain = new ArrayList<Block>();
-    public static enum Mode {INCREMENT, RANDOM};
+    public static enum Mode {INCREMENT, RANDOM, MULTITHREAD};
 
     // Options
-    public static int difficulty = 4; // ** SET DIFFICULTY LEVEL **
-    public static int numBlocks = 10; // ** SET NUMBER OF BLOCKS **
-    public static Mode miningMode = Mode.INCREMENT; // ** SET MINING MODE **
+    public static int difficulty = 5; // ** SET DIFFICULTY LEVEL **
+    public static int numBlocks = 3; // ** SET NUMBER OF BLOCKS **
+    public static Mode miningMode = Mode.MULTITHREAD; // ** SET MINING MODE **
 
     public static void main(String[] args) {
         int totalAttempts = 0;
@@ -44,6 +44,9 @@ public class EduChain {
 
             } else if (miningMode == Mode.RANDOM) {
                 block.mineBlockRandom(difficulty);
+
+            } else if (miningMode == Mode.MULTITHREAD) {
+                block.mineBlock(difficulty);
             }
 
             totalAttempts += block.attempts;
